@@ -18,6 +18,10 @@ from salmon import server, utils, mail, routing, queue as queue_module, encoding
 import salmon
 
 
+# squash warning about unicode literals. if there are bugs here, then it's
+# quite likely to have afffected us before switching to click.
+click.disable_unicode_literals_warning = True
+
 DEFAULT_PID_FILE = "./run/stmp.pid"
 
 copyright_notice = """
