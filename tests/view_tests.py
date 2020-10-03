@@ -16,6 +16,11 @@ class ViewsTestCase(TestCase):
         assert template
         assert template.render()
 
+    def test_loader_not_set(self):
+        view.LOADER = None
+        with self.assertRaises(TypeError):
+            view.load("template.txt")
+
     def test_render(self):
         # try with some empty vars
         text = view.render({}, "template.txt")
@@ -85,7 +90,7 @@ class ViewsTestCase(TestCase):
         assert str(msg)
 
     def test_unicode(self):
-        person = u'H\xe9avy M\xe9t\xe5l Un\xeec\xf8d\xe9'
+        Person = 'H\xe9avy M\xe9t\xe5l Un\xeec\xf8d\xe9'
         mail = view.respond(locals(), Html="unicode.html", From="test@localhost", To="receiver@localhost",
                             Subject='Test body from someone.')
 
@@ -94,3 +99,7 @@ class ViewsTestCase(TestCase):
         view.attach(mail, locals(), "unicode.html", filename="attached.html")
 
         assert str(mail)
+
+    def test_no_templates(self):
+        with self.assertRaises(TypeError):
+            view.respond(locals(), From="me@localhost", To="you@localhost", Subject="Hello")

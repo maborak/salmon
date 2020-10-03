@@ -55,6 +55,26 @@ class MessageTestCase(TestCase):
 
         assert str(msg)
 
+    def test_mail_attach_no_data_or_file(self):
+        msg = mail.MailResponse(
+            To="receiver@localhost",
+            Subject="Test message",
+            From="sender@localhost",
+        )
+
+        with self.assertRaises(TypeError):
+            msg.attach()
+
+    def test_mail_attach_file_no_exist(self):
+        msg = mail.MailResponse(
+            To="receiver@localhost",
+            Subject="Test message",
+            From="sender@localhost",
+        )
+
+        with self.assertRaises(TypeError):
+            msg.attach(filename="/filethatshouldnotexist")
+
     def test_mail_response_plain_text(self):
         sample = mail.MailResponse(
             To="receiver@localhost",
@@ -73,7 +93,6 @@ class MessageTestCase(TestCase):
             From="sender@localhost",
             Html="<html><body><p>From test_mail_response_html</p></body></html>",
         )
-
         assert str(sample)
         return sample
 
@@ -85,7 +104,15 @@ class MessageTestCase(TestCase):
             Html="<html><body><p>Hi there.</p></body></html>",
             Body="Test from test_mail_response_html_and_plain_text.",
         )
+        assert str(sample)
+        return sample
 
+    def test_mail_response_empty(self):
+        sample = mail.MailResponse(
+            To="receiver@localhost",
+            Subject="Test message",
+            From="sender@localhost",
+        )
         assert str(sample)
         return sample
 
@@ -99,7 +126,7 @@ class MessageTestCase(TestCase):
         with open("./README.rst") as file_obj:
             readme_data = file_obj.read()
 
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(ValueError):
             sample.attach(data=readme_data, disposition="inline")
 
         sample.attach(filename="./README.rst", content_type="text/plain", disposition="inline")
@@ -238,19 +265,19 @@ class MessageTestCase(TestCase):
             assert part.get_payload(), "outmsg parts don't have payload."
 
     def test_to_from_works(self):
-        msg = mail.MailRequest("fakepeer", "from@localhost", [u"<to1@localhost>", u"to2@localhost"], "")
+        msg = mail.MailRequest("fakepeer", "from@localhost", ["<to1@localhost>", "to2@localhost"], "")
         assert '<' not in msg.To, msg.To
 
-        msg = mail.MailRequest("fakepeer", "from@localhost", [u"to1@localhost", u"to2@localhost"], "")
+        msg = mail.MailRequest("fakepeer", "from@localhost", ["to1@localhost", "to2@localhost"], "")
         assert '<' not in msg.To, msg.To
 
-        msg = mail.MailRequest("fakepeer", "from@localhost", [u"to1@localhost", u"<to2@localhost>"], "")
+        msg = mail.MailRequest("fakepeer", "from@localhost", ["to1@localhost", "<to2@localhost>"], "")
         assert '<' not in msg.To, msg.To
 
-        msg = mail.MailRequest("fakepeer", "from@localhost", [u"to1@localhost"], "")
+        msg = mail.MailRequest("fakepeer", "from@localhost", ["to1@localhost"], "")
         assert '<' not in msg.To, msg.To
 
-        msg = mail.MailRequest("fakepeer", "from@localhost", [u"<to1@localhost>"], "")
+        msg = mail.MailRequest("fakepeer", "from@localhost", ["<to1@localhost>"], "")
         assert '<' not in msg.To, msg.To
 
     def test_decode_header_randomness(self):
